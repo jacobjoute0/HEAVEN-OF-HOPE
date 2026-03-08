@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary: #16a34a;
+  --color-primary-dark: #15803d;
+  --color-primary-light: #22c55e;
+  --color-secondary: #166534;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #f0fdf4;
+  color: #1a1a1a;
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, #166534 0%, #16a34a 50%, #22c55e 100%);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #166534, #22c55e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
