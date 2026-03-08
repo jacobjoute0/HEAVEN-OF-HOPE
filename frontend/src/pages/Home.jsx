@@ -44,7 +44,7 @@ export default function Home() {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
+            transition={{ duration: 2.0 }}
           >
             <p className="text-green-200 text-sm font-semibold uppercase tracking-widest mb-3">
               Welcome to
@@ -86,7 +86,7 @@ export default function Home() {
               key={stat.label}
               initial={{ opacity: 0, scale: 0.8 }}
               whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.1 }}
+              transition={{ delay: i * 1.0 }}
               viewport={{ once: true }}
             >
               <p className="text-3xl font-extrabold text-green-700">{stat.value}</p>
@@ -116,7 +116,7 @@ export default function Home() {
                 key={feature.title}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
+                transition={{ delay: i * 0.5 }}
                 viewport={{ once: true }}
                 className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-shadow duration-300 border border-green-100"
               >
