@@ -19,7 +19,8 @@ export function initFirebase() {
   try {
     const serviceAccount = JSON.parse(readFileSync(serviceAccountPath, 'utf8'));
     credential = admin.credential.cert(serviceAccount);
-  } catch {
+  } catch (err) {
+    console.warn('serviceAccountKey.json not found, falling back to applicationDefault():', err.message);
     credential = admin.credential.applicationDefault();
   }
 
