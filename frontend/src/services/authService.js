@@ -1,68 +1,75 @@
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+} from 'firebase/auth';
+import { auth } from '../config/firebase';
 import api from './api';
 
-export async function loginWithFirebase(email, password, role = 'student') {
-  const response = await api.post('/auth/login', { email, password, role });
-  const { token, user } = response.data;
-  localStorage.setItem('token', token);
-  localStorage.setItem('user', JSON.stringify(user));
-  localStorage.setItem('role', user.role || role);
-  return { token, user };
+/**
+ * Sign in via Firebase Auth.  The backend receives the Firebase ID token on
+ * subsequent API calls via the Axios interceptor in api.js.
+ */
+export async function loginWithFirebase(email, password) {
+  const credential = await signInWithEmailAndPassword(auth, email, password);
+  return credential.user;
 }
 
+/**
+ * Sign out from Firebase Auth and notify the backend so it can revoke
+ * refresh tokens server-side.
+ */
 export async function logout() {
   try {
     await api.post('/auth/logout');
   } catch {
-    // ignore
+    // Ignore backend errors during logout.
   }
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  localStorage.removeItem('role');
+  await signOut(auth);
 }
 
+/** Returns the currently signed-in Firebase user, or null. */
 export function getCurrentUser() {
-  try {
-    const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
-  } catch {
-    return null;
-  }
+  return auth.currentUser || null;
 }
 
-export function getUserRole() {
-  return localStorage.getItem('role') || null;
+/** Returns the current user's role from the Firebase custom claims. */
+export async function getUserRole() {
+  const user = auth.currentUser;
+  if (!user) return null;
+  const idTokenResult = await user.getIdTokenResult();
+  return idTokenResult.claims.role || null;
 }
 
-export function getToken() {
-  return localStorage.getItem('token') || null;
+/** Returns a fresh Firebase ID token for the current user. */
+export async function getToken() {
+  const user = auth.currentUser;
+  if (!user) return null;
+  return user.getIdToken();
 }
 
+/** True if a Firebase user is currently signed in. */
 export function isAuthenticated() {
-  return Boolean(getToken() && getCurrentUser());
+  return Boolean(auth.currentUser);
 }
 
-export async function refreshToken() {
-  try {
-    const response = await api.post('/auth/refresh');
-    const { token } = response.data;
-    localStorage.setItem('token', token);
-    return token;
-  } catch {
-    return null;
-  }
-}
-
+/** Send a password-reset email via Firebase Auth. */
 export async function forgotPassword(email) {
-  const response = await api.post('/auth/forgot-password', { email });
-  return response.data;
+  await sendPasswordResetEmail(auth, email);
 }
 
-export async function resetPassword(token, password) {
-  const response = await api.post('/auth/reset-password', { token, password });
-  return response.data;
-}
-
+/**
+ * Change the current user's password.
+ * Re-authenticates first so Firebase does not reject the request.
+ */
 export async function changePassword(currentPassword, newPassword) {
-  const response = await api.post('/auth/change-password', { currentPassword, newPassword });
-  return response.data;
+  const user = auth.currentUser;
+  if (!user || !user.email) throw new Error('Not authenticated');
+  const credential = EmailAuthProvider.credential(user.email, currentPassword);
+  await reauthenticateWithCredential(user, credential);
+  await updatePassword(user, newPassword);
 }
+

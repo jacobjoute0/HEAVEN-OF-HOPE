@@ -1,0 +1,165 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Role helpers ──────────────────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && getUserRole() == 'admin';
+    }
+
+    function isTeacher() {
+      return isSignedIn() && getUserRole() == 'teacher';
+    }
+
+    function isStudent() {
+      return isSignedIn() && getUserRole() == 'student';
+    }
+
+    function isParent() {
+      return isSignedIn() && getUserRole() == 'parent';
+    }
+
+    function isAdminOrTeacher() {
+      return isAdmin() || isTeacher();
+    }
+
+    // ─── users ─────────────────────────────────────────────────────────────────
+    // Each user may read their own profile; only admins may write any user doc.
+    match /users/{userId} {
+      allow read:  if request.auth.uid == userId || isAdmin();
+      allow create: if isAdmin();
+      allow update: if request.auth.uid == userId || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ─── students ──────────────────────────────────────────────────────────────
+    // Admins & teachers: full read/write.
+    // Students: read own record only.
+    // Parents: read records where guardianUid matches.
+    match /students/{studentId} {
+      allow read:  if isAdminOrTeacher()
+                   || (isStudent()  && request.auth.uid == resource.data.uid)
+                   || (isParent()   && request.auth.uid == resource.data.guardianUid);
+      allow create: if isAdmin();
+      allow update: if isAdminOrTeacher();
+      allow delete: if isAdmin();
+    }
+
+    // ─── teachers ──────────────────────────────────────────────────────────────
+    // Admins: full access. Teachers: read only.
+    match /teachers/{teacherId} {
+      allow read:  if isAdminOrTeacher();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ─── parents ───────────────────────────────────────────────────────────────
+    // Admins: full access. Parents: read own record.
+    match /parents/{parentId} {
+      allow read:  if isAdmin() || request.auth.uid == resource.data.uid;
+      allow create: if isAdmin();
+      allow update: if isAdmin() || request.auth.uid == resource.data.uid;
+      allow delete: if isAdmin();
+    }
+
+    // ─── announcements ─────────────────────────────────────────────────────────
+    // All authenticated users may read. Admins & teachers may write.
+    match /announcements/{announcementId} {
+      allow read:   if isSignedIn();
+      allow create: if isAdminOrTeacher();
+      allow update: if isAdminOrTeacher();
+      allow delete: if isAdmin();
+    }
+
+    // ─── attendance ────────────────────────────────────────────────────────────
+    // Admins & teachers: full access.
+    // Students: read own records. Parents: read their child's records.
+    match /attendance/{attendanceId} {
+      allow read:  if isAdminOrTeacher()
+                   || (isStudent() && request.auth.uid == resource.data.studentUid)
+                   || (isParent()  && request.auth.uid == resource.data.guardianUid);
+      allow create: if isAdminOrTeacher();
+      allow update: if isAdminOrTeacher();
+      allow delete: if isAdmin();
+    }
+
+    // ─── grades ────────────────────────────────────────────────────────────────
+    // Admins & teachers: full access.
+    // Students: read own grades. Parents: read their child's grades.
+    match /grades/{gradeId} {
+      allow read:  if isAdminOrTeacher()
+                   || (isStudent() && request.auth.uid == resource.data.studentUid)
+                   || (isParent()  && request.auth.uid == resource.data.guardianUid);
+      allow create: if isAdminOrTeacher();
+      allow update: if isAdminOrTeacher();
+      allow delete: if isAdmin();
+    }
+
+    // ─── assignments ───────────────────────────────────────────────────────────
+    // Admins & teachers: full access. Students & parents: read only.
+    match /assignments/{assignmentId} {
+      allow read:   if isSignedIn();
+      allow create: if isAdminOrTeacher();
+      allow update: if isAdminOrTeacher();
+      allow delete: if isAdmin();
+    }
+
+    // ─── timetables ────────────────────────────────────────────────────────────
+    // All authenticated users may read. Admins only may write.
+    match /timetables/{timetableId} {
+      allow read:   if isSignedIn();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ─── fees ──────────────────────────────────────────────────────────────────
+    // Admins: full access. Students & parents: read own records.
+    match /fees/{feeId} {
+      allow read:  if isAdmin()
+                   || (isStudent() && request.auth.uid == resource.data.studentUid)
+                   || (isParent()  && request.auth.uid == resource.data.guardianUid);
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ─── events ────────────────────────────────────────────────────────────────
+    // All authenticated users may read. Admins may write.
+    match /events/{eventId} {
+      allow read:   if isSignedIn();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ─── news ──────────────────────────────────────────────────────────────────
+    // All users (including unauthenticated) may read public news.
+    // Only admins may write.
+    match /news/{newsId} {
+      allow read:   if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ─── admissions ────────────────────────────────────────────────────────────
+    // Public may create (submit application). Admins may read and manage.
+    match /admissions/{admissionId} {
+      allow create: if true;
+      allow read:   if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+  }
+}
