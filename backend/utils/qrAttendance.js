@@ -65,7 +65,7 @@ export function verifyQRCode(token) {
   }
 
   if (Date.now() > payload.expiresAt) {
-    const expiredAt = new Date(payload.expiresAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    const expiredAt = new Date(payload.expiresAt).toLocaleTimeString(process.env.LOCALE || 'en-IN', { hour: '2-digit', minute: '2-digit' });
     return { valid: false, error: `QR code expired at ${expiredAt}. Please request a new code from your teacher.`, expiredAt: new Date(payload.expiresAt).toISOString() };
   }
 

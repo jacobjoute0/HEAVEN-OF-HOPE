@@ -46,7 +46,9 @@ export function verifyRazorpayPayment(orderId, paymentId, signature) {
     return true;
   }
 
-  // Validate that signature looks like a valid hex string before comparing
+  // Pre-validation: ensure signature is a 64-character hex string (SHA-256 HMAC output length).
+  // This is a format check only and is NOT a security control – the cryptographic
+  // constant-time comparison below is the actual security gate.
   if (!/^[0-9a-f]{64}$/i.test(signature)) {
     return false;
   }

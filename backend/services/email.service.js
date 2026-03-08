@@ -16,9 +16,12 @@ const FROM_NAME  = 'Haven of Hope Academy';
 const FROM_EMAIL = process.env.SMTP_USER || 'noreply@havenofhope.edu';
 
 function stripHtml(html) {
-  // Single-pass replacement of all HTML tags with spaces.
+  // Remove script/style blocks and their content first, then strip remaining tags.
   // Used only for plain-text email fallback (not browser-rendered).
+  // For production use with untrusted HTML, replace with a dedicated library
+  // such as 'html-to-text' or 'striptags'.
   return html
+    .replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, ' ')
     .replace(/[<][^>]*[>]/g, ' ')
     .replace(/\s{2,}/g, ' ')
     .trim();
