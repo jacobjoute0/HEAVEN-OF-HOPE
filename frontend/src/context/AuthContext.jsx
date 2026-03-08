@@ -1,4 +1,11 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+} from 'firebase/auth';
+import { auth } from '../config/firebase';
 import api from '../services/api';
 
 const AuthContext = createContext(null);
@@ -9,79 +16,66 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Restore session from localStorage
+  // Subscribe to Firebase Auth state changes so the session stays in sync.
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
-    const savedRole = localStorage.getItem('role');
-    if (token && savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-        setRole(savedRole);
-      } catch {
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        localStorage.removeItem('role');
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          // Fetch the user's role and profile from the backend.
+          const { data } = await api.get('/auth/profile');
+          setUser({ ...firebaseUser, ...data.user });
+          setRole(data.user?.role || null);
+        } catch {
+          // Profile fetch failed — still treat user as authenticated but
+          // without a role so ProtectedRoute can redirect appropriately.
+          setUser(firebaseUser);
+          setRole(null);
+        }
+      } else {
+        setUser(null);
+        setRole(null);
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    });
+
+    return unsubscribe;
   }, []);
 
-  const login = useCallback(async (email, password, selectedRole = 'student') => {
+  const login = useCallback(async (email, password) => {
     setError(null);
     try {
-      const response = await api.post('/auth/login', { email, password, role: selectedRole });
-      const { token, user: userData } = response.data;
-      const userRole = userData.role || selectedRole;
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('role', userRole);
-      setUser(userData);
-      setRole(userRole);
-      return { success: true, role: userRole };
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+      // The onAuthStateChanged listener will handle setting user/role.
+      // Resolve with the Firebase user so callers can redirect immediately.
+      return { success: true, user: credential.user };
     } catch (err) {
-      const message = err.response?.data?.message || 'Login failed. Please check your credentials.';
+      const message = err.message || 'Login failed. Please check your credentials.';
       setError(message);
       return { success: false, error: message };
     }
-  }, []);
-
-  const loginWithToken = useCallback((token, userData, userRole) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('role', userRole);
-    setUser(userData);
-    setRole(userRole);
   }, []);
 
   const logout = useCallback(async () => {
     try {
       await api.post('/auth/logout');
     } catch {
-      // ignore logout API errors
-    } finally {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('role');
-      setUser(null);
-      setRole(null);
+      // Ignore backend logout errors.
     }
+    await signOut(auth);
+    // onAuthStateChanged will clear user/role.
+  }, []);
+
+  const forgotPassword = useCallback(async (email) => {
+    await sendPasswordResetEmail(auth, email);
   }, []);
 
   const updateUser = useCallback((updates) => {
-    setUser((prev) => {
-      const updated = { ...prev, ...updates };
-      localStorage.setItem('user', JSON.stringify(updated));
-      return updated;
-    });
+    setUser((prev) => ({ ...prev, ...updates }));
   }, []);
 
   const isAuthenticated = Boolean(user);
 
-  const hasRole = useCallback(
-    (...roles) => roles.includes(role),
-    [role]
-  );
+  const hasRole = useCallback((...roles) => roles.includes(role), [role]);
 
   const value = {
     user,
@@ -90,8 +84,8 @@ export function AuthProvider({ children }) {
     error,
     isAuthenticated,
     login,
-    loginWithToken,
     logout,
+    forgotPassword,
     updateUser,
     hasRole,
     setError,

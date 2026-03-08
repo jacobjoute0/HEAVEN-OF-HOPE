@@ -22,21 +22,50 @@ A production-ready School ERP (Enterprise Resource Planning) web application for
 
 ```
 HEAVEN-OF-HOPE/
-├── frontend/                  # React Vite app
+├── frontend/                     # React (Vite) + TailwindCSS app
 │   ├── src/
-│   │   ├── components/        # Reusable UI components (Navbar, Footer)
-│   │   ├── pages/             # Page components (Home, About, Academics…)
-│   │   ├── layouts/           # Layout wrappers (MainLayout)
-│   │   └── services/          # Axios API service
+│   │   ├── config/
+│   │   │   └── firebase.js        # Firebase client SDK initialisation
+│   │   ├── assets/                # Static assets (images, icons)
+│   │   ├── components/            # Reusable UI components (Navbar, Footer, Sidebar, Card)
+│   │   ├── context/               # React context providers (AuthContext, NotificationContext)
+│   │   ├── layouts/
+│   │   │   ├── PublicLayout.jsx   # Wraps public pages with Navbar + Footer
+│   │   │   ├── DashboardLayout.jsx# Generic authenticated portal shell
+│   │   │   ├── MainLayout.jsx     # (legacy alias for PublicLayout)
+│   │   │   ├── StudentLayout.jsx
+│   │   │   ├── TeacherLayout.jsx
+│   │   │   ├── ParentLayout.jsx
+│   │   │   └── AdminLayout.jsx
+│   │   ├── pages/                 # Page components per role
+│   │   │   ├── (public)           # Home, About, Academics, Admissions, …
+│   │   │   ├── admin/
+│   │   │   ├── student/
+│   │   │   ├── teacher/
+│   │   │   └── parent/
+│   │   ├── routes/
+│   │   │   ├── AppRouter.jsx      # React Router v7 route definitions
+│   │   │   └── ProtectedRoute.jsx # Role-based route guard
+│   │   ├── services/
+│   │   │   ├── api.js             # Axios instance with Firebase ID-token interceptor
+│   │   │   ├── authService.js     # Firebase Auth helpers (login, logout, etc.)
+│   │   │   └── paymentService.js
+│   │   └── utils/                 # Shared formatters, validators
 │   └── vite.config.js
-├── backend/                   # Node.js Express API
-│   ├── config/                # Firebase config
-│   ├── controllers/           # Route controllers
-│   ├── middleware/             # Auth middleware
-│   ├── models/                # Data models / validators
-│   └── routes/                # Express routers
+├── backend/                       # Node.js / Express.js API
+│   ├── config/
+│   │   └── firebase.js            # Firebase Admin SDK initialisation
+│   ├── controllers/               # Route handlers
+│   ├── middleware/
+│   │   ├── auth.middleware.js      # verifyToken + requireRole (primary)
+│   │   └── authMiddleware.js       # Re-export alias (camelCase convention)
+│   ├── models/                    # Data-shape helpers / Firestore model utils
+│   ├── routes/                    # Express routers
+│   ├── services/                  # Business-logic services (email, payment, …)
+│   └── utils/
 ├── database-schema/
-│   └── firestore-schema.md    # Firestore collections & security rules
+│   ├── firestore.rules            # Firestore security rules (deploy with Firebase CLI)
+│   └── firestore-schema.md        # Annotated collection & field reference
 └── README.md
 ```
 
@@ -75,6 +104,14 @@ npm run dev
 ### Frontend (`frontend/.env.local`)
 ```
 VITE_API_URL=http://localhost:5000/api
+
+# Firebase client SDK — from Firebase Console → Project Settings → General
+VITE_FIREBASE_API_KEY=your-api-key
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+VITE_FIREBASE_APP_ID=your-app-id
 ```
 
 ### Backend (`backend/.env`)
@@ -107,6 +144,13 @@ FIREBASE_STORAGE_BUCKET=your-project.appspot.com
 ## Database
 
 See [`database-schema/firestore-schema.md`](database-schema/firestore-schema.md) for the full Firestore collections, field definitions, and security rules.
+
+Deploy the Firestore security rules with the Firebase CLI:
+
+```bash
+# Add to firebase.json:  "firestore": { "rules": "database-schema/firestore.rules" }
+firebase deploy --only firestore:rules
+```
 
 ---
 
