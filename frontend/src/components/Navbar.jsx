@@ -8,7 +8,9 @@ const navLinks = [
   { name: 'Academics', path: '/academics' },
   { name: 'Admissions', path: '/admissions' },
   { name: 'Gallery', path: '/gallery' },
-  { name: 'Contact', path: '/contact' },
+  { name: 'Admin Login', path: '/admin/login' },
+  // { name: 'Contact', path: '/contact' },
+  // { name: 'Contact', path: '/contact' },
 ];
 
 export default function Navbar() {
