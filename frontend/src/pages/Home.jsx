@@ -25,10 +25,10 @@ const features = [
 ];
 
 const stats = [
-  { label: 'Students Enrolled', value: '500+' },
-  { label: 'Qualified Teachers', value: '40+' },
-  { label: 'Years of Excellence', value: '15+' },
-  { label: 'Pass Rate', value: '98%' },
+  { label: 'Students Enrolled', value: '100+' },
+  { label: 'Qualified Teachers', value: '10+' },
+  { label: 'Years of Excellence', value: '1+' },
+  { label: 'Pass Rate', value: '100%' },
 ];
 
 export default function Home() {
