@@ -43,6 +43,9 @@ export default function Login() {
         <p className="text-center text-gray-500 text-sm mt-6">
           Need help?{' '}
           <Link to="/contact" className="text-green-600 hover:underline">Contact us</Link>
+          <p className="mt-6 text-center text-sm text-gray-400">
+          <Link to="/" className="text-green-600 hover:underline">← Back to Home</Link>
+        </p>
         </p>
       </motion.div>
     </div>

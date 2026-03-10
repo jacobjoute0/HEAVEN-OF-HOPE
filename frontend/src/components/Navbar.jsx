@@ -9,6 +9,10 @@ const navLinks = [
   { name: 'Admissions', path: '/admissions' },
   { name: 'Gallery', path: '/gallery' },
   { name: 'Admin Login', path: '/admin/login' },
+  { name: 'Parent Login   ',path: '/parent/login'},
+  { name: 'Teacher Login', path:'/teacherlogin'},
+  { name: 'Student Login', path:'/student/login'},
+
   // { name: 'Contact', path: '/contact' },
   // { name: 'Contact', path: '/contact' },
 ];
@@ -23,8 +27,13 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full gradient-bg flex items-center justify-center text-white font-bold text-lg border-2 border-green-300">
+            {/* <div className="w-10 h-10 rounded-full gradient-bg flex items-center justify-center text-white font-bold text-lg border-2 border-green-300">
               H
+            </div> */}
+            <div>
+                <img src='C:\RETRET\HEAVEN-OF-HOPE\frontend\src\assets\logo.png' alt="Logo" className="h-50 w-50" />
+
+
             </div>
             <div className="hidden sm:block">
               <p className="font-bold text-lg leading-tight">Haven of Hope Academy</p>
