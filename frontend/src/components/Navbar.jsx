@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-
+import logo from '../assets/logo.png';
 const navLinks = [
   { name: 'Home', path: '/' },
   { name: 'About', path: '/about' },
@@ -27,13 +27,13 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
-            {/* <div className="w-10 h-10 rounded-full gradient-bg flex items-center justify-center text-white font-bold text-lg border-2 border-green-300">
-              H
-            </div> */}
+          
             <div>
-                <img src='C:\RETRET\HEAVEN-OF-HOPE\frontend\src\assets\logo.png' alt="Logo" className="h-50 w-50" />
-
-
+               <img 
+  src={logo} 
+  alt="Logo" 
+  className="h-16 w-16 rounded-full object-cover border-2 border-green-300"
+/>
             </div>
             <div className="hidden sm:block">
               <p className="font-bold text-lg leading-tight">Haven of Hope Academy</p>
