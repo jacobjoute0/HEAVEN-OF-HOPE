@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../assets/logo.png';
-const navLinks = [
+const navLinks = [ 
   { name: 'Home', path: '/' },
   { name: 'About', path: '/about' },
   { name: 'Academics', path: '/academics' },
@@ -10,7 +10,7 @@ const navLinks = [
   { name: 'Gallery', path: '/gallery' },
   { name: 'Admin Login', path: '/admin/login' },
   { name: 'Parent Login   ',path: '/parent/login'},
-  { name: 'Teacher Login', path:'/teacherlogin'},
+  { name: 'Teacher Login', path:'/teacher/login'},
   { name: 'Student Login', path:'/student/login'},
 
   // { name: 'Contact', path: '/contact' },
@@ -23,8 +23,8 @@ export default function Navbar() {
 
   return (
     <nav className="bg-green-800 text-white shadow-lg sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      <div className="w-full px-6">
+         <div className="flex items-center justify-between h-24">  
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
           
@@ -35,19 +35,19 @@ export default function Navbar() {
   className="h-16 w-16 rounded-full object-cover border-2 border-green-300"
 />
             </div>
-            <div className="hidden sm:block">
-              <p className="font-bold text-lg leading-tight">Haven of Hope Academy</p>
-              <p className="text-green-300 text-xs italic">Learning Today, Leading Tomorrow</p>
+            <div className="sm:block">
+              <p className="font-bold italic text-lg leading-tight">Haven of Hope Academy</p>
+              <p className="text-green-300 italic text-xs italic">Learning Today, Leading Tomorrow</p>
             </div>
           </Link>
 
           {/* Desktop Links */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-3">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                className={`px-3 py-2 rounded-md text-lg font-medium transition-colors duration-200 ${
                   location.pathname === link.path
                     ? 'bg-green-600 text-white'
                     : 'text-green-100 hover:bg-green-700 hover:text-white'

@@ -70,7 +70,7 @@ function LoadingFallback() {
 }
 
 export default function AppRouter() {
-  return (
+  return ( 
     <BrowserRouter>
       <Suspense fallback={<LoadingFallback />}>
         <Routes>

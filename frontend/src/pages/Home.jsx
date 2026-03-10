@@ -46,7 +46,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.25 }}
           >
-            <p className="text-green-200 text-sm font-semibold uppercase tracking-widest mb-3">
+            <p className="text-white-500 text-lg font-bold  uppercase tracking-widest mb-3">
               Welcome to
             </p>
             <h1 className="text-4xl md:text-6xl font-extrabold mb-4 leading-tight">
