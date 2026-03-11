@@ -35,7 +35,7 @@ export default function Home() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="gradient-bg text-white py-24 px-4 relative overflow-hidden">
+      <section className="gradient-bg text-white min-h-[50vh] flex items-center justify-center px-4 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-white"></div>
           <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-white"></div>
@@ -147,15 +147,15 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 px-4 bg-white text-center">
+      <section className="gradient-bg text-white min-h-[20vh] flex items-center justify-center px-4 relative overflow-hidden">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="max-w-2xl mx-auto"
         >
-          <h2 className="text-3xl font-bold text-green-800 mb-4">Ready to Join Our Family?</h2>
-          <p className="text-gray-600 mb-8">
+          <h2 className="text-3xl font-bold text-black-300 mb-4">Ready to Join Our Family?</h2>
+          <p className="text-black-600 mb-8 flexitems-centerjustify-center text-lg text-center">
             Take the first step toward a bright future. Admissions are open for the upcoming academic year.
           </p>
           <Link
