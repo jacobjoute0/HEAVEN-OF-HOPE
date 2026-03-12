@@ -1,12 +1,11 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   sendPasswordResetEmail,
-} from 'firebase/auth';
-import { auth } from '../config/firebase';
-import api from '../services/api';
+} from "firebase/auth";
+import { auth } from "../config/firebase";
 
 const AuthContext = createContext(null);
 
@@ -16,18 +15,23 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Subscribe to Firebase Auth state changes so the session stays in sync.
+  // Listen for Firebase auth state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
-          // Fetch the user's role and profile from the backend.
-          const token = await firebaseUser.getIdTokenResult();
+          // Force refresh token to get custom claims
+          const token = await firebaseUser.getIdTokenResult(true);
+
+          const userRole = token.claims.role || null;
+
+          console.log("Logged user:", firebaseUser.email);
+          console.log("User role:", userRole);
+
           setUser(firebaseUser);
-          setRole(token.claims.role || null);
-        } catch {
-          // Profile fetch failed — still treat user as authenticated but
-          // without a role so ProtectedRoute can redirect appropriately.
+          setRole(userRole);
+        } catch (err) {
+          console.error("Error reading role:", err);
           setUser(firebaseUser);
           setRole(null);
         }
@@ -35,47 +39,58 @@ export function AuthProvider({ children }) {
         setUser(null);
         setRole(null);
       }
+
       setLoading(false);
     });
 
     return unsubscribe;
   }, []);
 
+  // Login
   const login = useCallback(async (email, password) => {
     setError(null);
+
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
-      // The onAuthStateChanged listener will handle setting user/role.
-      // Resolve with the Firebase user so callers can redirect immediately.
-      return { success: true, user: credential.user };
+
+      return {
+        success: true,
+        user: credential.user,
+      };
     } catch (err) {
-      const message = err.message || 'Login failed. Please check your credentials.';
+      const message = err.message || "Login failed";
       setError(message);
-      return { success: false, error: message };
+
+      return {
+        success: false,
+        error: message,
+      };
     }
   }, []);
 
+  // Logout
   const logout = useCallback(async () => {
-    try {
-      await api.post('/auth/logout');
-    } catch {
-      // Ignore backend logout errors.
-    }
     await signOut(auth);
-    // onAuthStateChanged will clear user/role.
   }, []);
 
+  // Reset password
   const forgotPassword = useCallback(async (email) => {
     await sendPasswordResetEmail(auth, email);
   }, []);
 
+  // Update user locally
   const updateUser = useCallback((updates) => {
     setUser((prev) => ({ ...prev, ...updates }));
   }, []);
 
-  const isAuthenticated = Boolean(user);
+  const isAuthenticated = !!user;
 
-  const hasRole = useCallback((...roles) => roles.includes(role), [role]);
+  const hasRole = useCallback(
+    (...roles) => {
+      return roles.includes(role);
+    },
+    [role]
+  );
 
   const value = {
     user,
@@ -96,9 +111,12 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used inside <AuthProvider>');
+
+  if (!context) {
+    throw new Error("useAuth must be used inside <AuthProvider>");
+  }
+
   return context;
 }
 
-export { AuthContext };
 export default AuthContext;
