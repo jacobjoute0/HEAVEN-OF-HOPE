@@ -53,9 +53,17 @@ export function AuthProvider({ children }) {
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
 
+      // Immediately fetch custom claims so role is available before navigate()
+      const token = await credential.user.getIdTokenResult(true);
+      const userRole = token.claims.role || null;
+
+      setUser(credential.user);
+      setRole(userRole);
+
       return {
         success: true,
         user: credential.user,
+        role: userRole,
       };
     } catch (err) {
       const message = err.message || "Login failed";
