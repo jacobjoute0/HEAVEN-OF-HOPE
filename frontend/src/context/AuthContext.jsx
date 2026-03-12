@@ -22,9 +22,9 @@ export function AuthProvider({ children }) {
       if (firebaseUser) {
         try {
           // Fetch the user's role and profile from the backend.
-          const { data } = await api.get('/auth/profile');
-          setUser({ ...firebaseUser, ...data.user });
-          setRole(data.user?.role || null);
+          const token = await firebaseUser.getIdTokenResult();
+          setUser(firebaseUser);
+          setRole(token.claims.role || null);
         } catch {
           // Profile fetch failed — still treat user as authenticated but
           // without a role so ProtectedRoute can redirect appropriately.
