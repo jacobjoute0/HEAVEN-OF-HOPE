@@ -35,7 +35,7 @@ export default function Home() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="gradient-bg text-white min-h-[50vh] flex items-center justify-center px-4 relative overflow-hidden">
+      <section className="gradient-bg text-white min-h-[40vh] flex items-center justify-center px-4 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-white"></div>
           <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-white"></div>
@@ -49,7 +49,7 @@ export default function Home() {
             <p className="text-white-500 text-lg font-bold  uppercase tracking-widest mb-3">
               Welcome to
             </p>
-            <h1 className="text-4xl md:text-6xl font-extrabold mb-4 leading-tight">
+            <h1 className="text-4xl md:text-6xl font-extrabold uppercase   mb-4 leading-tight">
               Haven of Hope Academy
             </h1>
             <p className="text-xl md:text-2xl text-green-200 italic mb-2">
@@ -79,7 +79,7 @@ export default function Home() {
       </section>
 
       {/* Stats */}
-      <section className="bg-white py-12 shadow-sm">
+      <section className="bg-white py-12 shadow-sm flex items-center justify-center relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {stats.map((stat, i) => (
             <motion.div
@@ -89,15 +89,15 @@ export default function Home() {
               transition={{ delay: i * 0.7 }}
               viewport={{ once: true }}
             >
-              <p className="text-3xl font-extrabold text-green-700">{stat.value}</p>
-              <p className="text-gray-600 text-sm mt-1">{stat.label}</p>
+              <p className="text-3xl font-extrabold text-black-700">{stat.value}</p>
+              <p className="text-green-700 text-md mt-1">{stat.label}</p>
             </motion.div>
           ))}
         </div>
       </section>
 
       {/* Features */}
-      <section className="py-20 px-4 bg-green-50">
+      <section className="py-20 px-4 bg-green-50 flex items-center justify-center relative overflow-hidden">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -105,8 +105,8 @@ export default function Home() {
             viewport={{ once: true }}
             className="text-center mb-14"
           >
-            <h2 className="text-3xl font-bold gradient-text mb-3">Why Choose Us?</h2>
-            <p className="text-gray-600 max-w-xl mx-auto">
+            <h2 className="text-5xl min-h-[10vh] font-extrabold item-center gradient-text mb-3">Why Choose Us?</h2>
+            <p className="text-black-600 flex  font-bold max-w-xl mx-auto">
               At Haven of Hope Academy, we are committed to nurturing the whole child — mind, body, and spirit.
             </p>
           </motion.div>
@@ -130,7 +130,7 @@ export default function Home() {
       </section>
 
       {/* Bible Verse Banner */}
-      <section className="gradient-bg text-white py-16 px-4">
+      <section className="gradient-bg text-white py-16 px-4 flex items-center justify-center relative overflow-hidden">
         <div className="max-w-3xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0 }}
