@@ -47,7 +47,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   // Login
-  const login = useCallback(async (email, password) => {
+  // expectedRole: optional hint passed by role-specific login pages (e.g. 'student').
+  // If provided, the user's actual Firebase custom-claim role must match it; otherwise
+  // the session is cancelled and a helpful error is returned.
+  const login = useCallback(async (email, password, expectedRole = null) => {
     setError(null);
 
     try {
@@ -56,6 +59,15 @@ export function AuthProvider({ children }) {
       // Immediately fetch custom claims so role is available before navigate()
       const token = await credential.user.getIdTokenResult(true);
       const userRole = token.claims.role || null;
+
+      // Reject login if the account role doesn't match this portal's expected role
+      if (expectedRole && userRole !== expectedRole) {
+        await signOut(auth);
+        const label = expectedRole.charAt(0).toUpperCase() + expectedRole.slice(1);
+        const message = `This is not a ${label} account. Please use the correct login portal.`;
+        setError(message);
+        return { success: false, error: message };
+      }
 
       setUser(credential.user);
       setRole(userRole);
