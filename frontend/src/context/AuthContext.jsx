@@ -6,8 +6,35 @@ import {
   sendPasswordResetEmail,
 } from "firebase/auth";
 import { auth } from "../config/firebase";
+import api from "../services/api";
 
 const AuthContext = createContext(null);
+
+async function resolveAuthenticatedUser(firebaseUser) {
+  const tokenResult = await firebaseUser.getIdTokenResult(true);
+  let serverUser = null;
+
+  if (!tokenResult.claims.role) {
+    try {
+      const idToken = await firebaseUser.getIdToken();
+      const response = await api.post("/auth/login", { idToken });
+      serverUser = response.data?.user || null;
+    } catch (error) {
+      console.error("Error resolving user profile from backend:", error);
+    }
+  }
+
+  const role = tokenResult.claims.role || serverUser?.role || null;
+  const user = {
+    uid: firebaseUser.uid,
+    email: firebaseUser.email,
+    displayName: firebaseUser.displayName || serverUser?.name || "",
+    name: serverUser?.name || firebaseUser.displayName || "",
+    photoURL: firebaseUser.photoURL || null,
+  };
+
+  return { role, user };
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -20,19 +47,19 @@ export function AuthProvider({ children }) {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
-          // Force refresh token to get custom claims
-          const token = await firebaseUser.getIdTokenResult(true);
+          const authenticatedUser = await resolveAuthenticatedUser(firebaseUser);
 
-          const userRole = token.claims.role || null;
-
-          console.log("Logged user:", firebaseUser.email);
-          console.log("User role:", userRole);
-
-          setUser(firebaseUser);
-          setRole(userRole);
+          setUser(authenticatedUser.user);
+          setRole(authenticatedUser.role);
         } catch (err) {
           console.error("Error reading role:", err);
-          setUser(firebaseUser);
+          setUser({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName || "",
+            name: firebaseUser.displayName || "",
+            photoURL: firebaseUser.photoURL || null,
+          });
           setRole(null);
         }
       } else {
@@ -55,10 +82,8 @@ export function AuthProvider({ children }) {
 
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
-
-      // Immediately fetch custom claims so role is available before navigate()
-      const token = await credential.user.getIdTokenResult(true);
-      const userRole = token.claims.role || null;
+      const authenticatedUser = await resolveAuthenticatedUser(credential.user);
+      const userRole = authenticatedUser.role;
 
       // Reject login if the account role doesn't match this portal's expected role
       if (expectedRole && userRole !== expectedRole) {
@@ -69,12 +94,12 @@ export function AuthProvider({ children }) {
         return { success: false, error: message };
       }
 
-      setUser(credential.user);
+      setUser(authenticatedUser.user);
       setRole(userRole);
 
       return {
         success: true,
-        user: credential.user,
+        user: authenticatedUser.user,
         role: userRole,
       };
     } catch (err) {

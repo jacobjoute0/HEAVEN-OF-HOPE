@@ -1,6 +1,14 @@
 import axios from 'axios';
 import { auth } from '../config/firebase';
 
+function getLoginPath(pathname) {
+  if (pathname.startsWith('/student')) return '/student/login';
+  if (pathname.startsWith('/teacher')) return '/teacher/login';
+  if (pathname.startsWith('/parent')) return '/parent/login';
+  if (pathname.startsWith('/admin')) return '/admin/login';
+  return '/login';
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
@@ -37,7 +45,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      window.location.href = '/login';
+      window.location.href = getLoginPath(window.location.pathname);
     }
     return Promise.reject(error);
   }

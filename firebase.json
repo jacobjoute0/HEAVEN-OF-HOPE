@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "dist",
+    "public": "frontend/dist",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -14,8 +14,8 @@
     "rules": "storage.rules"
   },
   "database": {
-    "rules": "default"
-  },
+  "rules": "database.rules.json"
+},
   "emulators": {
     "auth": {
       "host": "127.0.0.1",

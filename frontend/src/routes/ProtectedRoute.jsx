@@ -1,6 +1,14 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+function getLoginPath(pathname) {
+  if (pathname.startsWith('/student')) return '/student/login';
+  if (pathname.startsWith('/teacher')) return '/teacher/login';
+  if (pathname.startsWith('/parent')) return '/parent/login';
+  if (pathname.startsWith('/admin')) return '/admin/login';
+  return '/login';
+}
+
 export function ProtectedRoute({ allowedRoles = [] }) {
   const { isAuthenticated, role, loading } = useAuth();
   const location = useLocation();
@@ -17,7 +25,7 @@ export function ProtectedRoute({ allowedRoles = [] }) {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to={getLoginPath(location.pathname)} state={{ from: location }} replace />;
   }
 
   // If authenticated but role not yet resolved, wait instead of redirecting
@@ -39,7 +47,7 @@ export function ProtectedRoute({ allowedRoles = [] }) {
       parent:  '/parent/dashboard',
       admin:   '/admin/dashboard',
     };
-    return <Navigate to={redirectMap[role] || '/login'} replace />;
+    return <Navigate to={redirectMap[role] || getLoginPath(location.pathname)} replace />;
   }
 
   return <Outlet />;

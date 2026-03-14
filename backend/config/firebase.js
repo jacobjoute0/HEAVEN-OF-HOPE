@@ -7,11 +7,28 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 let firebaseApp;
 
+function configureFirebaseEmulators() {
+  if (process.env.USE_FIREBASE_EMULATOR !== 'true') {
+    return;
+  }
+
+  const emulatorHost = process.env.FIREBASE_EMULATOR_HOST || '127.0.0.1';
+  const authPort = process.env.FIREBASE_AUTH_EMULATOR_PORT || '9100';
+  const firestorePort = process.env.FIRESTORE_EMULATOR_PORT || '8089';
+  const storagePort = process.env.FIREBASE_STORAGE_EMULATOR_PORT || '9200';
+
+  process.env.FIREBASE_AUTH_EMULATOR_HOST ||= `${emulatorHost}:${authPort}`;
+  process.env.FIRESTORE_EMULATOR_HOST ||= `${emulatorHost}:${firestorePort}`;
+  process.env.FIREBASE_STORAGE_EMULATOR_HOST ||= `${emulatorHost}:${storagePort}`;
+}
+
 export function initFirebase() {
   if (admin.apps.length > 0) {
     firebaseApp = admin.app();
     return firebaseApp;
   }
+
+  configureFirebaseEmulators();
 
   const serviceAccountPath = join(__dirname, '../serviceAccountKey.json');
   let credential;
