@@ -9,7 +9,7 @@
 "rewrites": [
 {
 "source": "/api/**",
-"destination": "http://127.0.0.1:5001/api"
+"destination": "http://127.0.0.1:5000/api"
 }
 ]
 },
@@ -41,7 +41,7 @@
 },
 "hosting": {
 "host": "127.0.0.1",
-"port": 5001
+"port": 5002
 },
 "ui": {
 "enabled": true,
